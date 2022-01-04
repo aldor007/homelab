@@ -1,0 +1,59 @@
+apiVersion: mariadb.mkaciuba.com/v1alpha1
+kind: MariaDBCluster
+metadata:
+  name: mkaciuba
+spec:
+  primaryCount: 2
+  dataStorageSize: 2G
+  image: "ghcr.io/aldor007/mariadb-galera:mariadb-1.0.13"
+  storageClass: nas
+  service:
+      enabled: true
+      loadbalancerIP: 10.39.39.40
+      type: LoadBalancer
+  rootPassword:
+    name: mariadb-mkaciuba
+    key: rootPassword
+---
+apiVersion: mariadb.mkaciuba.com/v1alpha1
+kind: MariaDBDatabase
+metadata:
+  name: strapi
+spec:
+  clusterRef:
+    name: mkaciuba
+    namespace: {{ .Release.Namespace }}
+  database: strapi
+---
+apiVersion: mariadb.mkaciuba.com/v1alpha1
+kind: MariaDBUser
+metadata:
+  name: strapi
+spec:
+  clusterRef:
+    name: mkaciuba
+    namespace: {{ .Release.Namespace }}
+  user: strapi
+  password:
+    name: mariadb-mkaciuba
+    key: strapiPassword
+  allowedHosts:
+    - "%"
+  permissions:
+    - schema: strapi
+      tables: [ "*" ]
+      permissions:
+        - ALL
+---
+apiVersion: mariadb.mkaciuba.com/v1alpha1
+kind: MariaDBBackup
+metadata:
+  name: strapi
+spec:
+  clusterRef:
+    name: mkaciuba
+    namespace: {{ .Release.Namespace }}
+  backupURL: s3://mkaciuba-backup/mkaciuba-strapi/
+  backupDBName: strapi
+  backupSecretName: s3-backup
+  cron:   "22 0 * * *"

@@ -1,0 +1,33 @@
+
+---
+
+- name: Configure bgp
+  community.network.edgeos_config:
+    lines:
+      - set protocols bgp 64512 parameters router-id {{ router_ip }}
+      - set protocols bgp 64512 maximum-paths ibgp 32
+
+- name: Configure neighbor
+  with_items:
+    - "{{ bgp_neighbor }}"
+  community.network.edgeos_config:
+    lines:
+      - set protocols bgp 64512 neighbor {{ item }} remote-as 64512
+
+- name: Configure maximum-paths 
+  community.network.edgeos_config:
+    lines:
+      - set protocols bgp 64512 maximum-paths ibgp 32
+
+- name: Backup and load from file
+  community.network.edgeos_config:
+    src: edgeos.cfg
+    backup: yes
+
+- name: Configurable backup path
+  community.network.edgeos_config:
+    src: edgeos.cfg
+    backup: yes
+    backup_options:
+      filename: backup.cfg
+      dir_path: /home/user

@@ -1,0 +1,124 @@
+# Default values for mkaciuba.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 2
+
+strapi:
+  image:
+    repository: ghcr.io/aldor007/mkaciuba-strapi
+    pullPolicy: IfNotPresent
+    tag: strapi-0.0.30
+front:
+  ingress:
+    enabled: true
+    annotations:
+      traefik.ingress.kubernetes.io/router.middlewares: mkaciuba-vary@kubernetescrd
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: mkaciuba.k8s.m39
+        paths:
+          - path: /
+      - host: beta.mkaciuba.pl
+        paths:
+          - path: /
+      - host: mkaciuba.pl
+        paths:
+          - path: /
+    tls: []
+  image:
+    repository: ghcr.io/aldor007/mkaciuba
+    pullPolicy: IfNotPresent
+    tag: photos-0.0.63
+  secrets:
+    enabled: false
+    env:
+
+database:
+  rootPassword: NOT_SECRET
+  strapiPassword: SOMETHING_PATRZAJ
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations:
+  vault.security.banzaicloud.io/vault-addr: https://vault.vault.svc.cluster.local:8200
+  vault.security.banzaicloud.io/vault-tls-secret: "vault-tls"
+  vault.security.banzaicloud.io/vault-path: "kubernetes"
+  vault.security.banzaicloud.io/vault-role: "mkaciuba"
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: mkaciuba-vary@kubernetescrd
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: strapi.k8s.m39
+      paths:
+        - path: /
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources:
+  limits:
+    cpu: 1200m
+    memory: 528Mi
+  requests:
+    cpu: 500m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+secrets:
+  enabled: true
+  env:
+    DATABASE_CLIENT: mysql
+    DATABASE_HOST: mariadb-headless-mkaciuba-primary
+    DATABASE_PORT: "3306"
+    DATABASE_NAME: strapi
+    DATABASE_USERNAME: strapi
+    DATABASE_SSL: 'false'
+    AWS_ACCESS_KEY_ID: "vault:mkaciuba/data/strapi#s3.accessKey"
+    AWS_ACCESS_SECRET: "vault:mkaciuba/data/strapi#s3.secretAccessKey"
+    AWS_REGION: eu-central-1
+    AWS_BUCKET: mort-storage

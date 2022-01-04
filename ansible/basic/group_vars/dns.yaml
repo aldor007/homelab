@@ -1,0 +1,91 @@
+bind_zones:
+  - name: k8s.m39
+    create_reverse_zones: false  # Skip creation of reverse zones
+    primaries:
+      - 10.39.38.201
+      - 10.39.38.202
+    name_servers:
+      - ns1
+      - ns2
+    hosts:
+      - name: ns1
+        ip: 10.39.38.201
+      - name: ns2
+        ip: 10.39.38.202
+      - name: grafana
+        ip: 10.39.39.1
+      - name: alertmanager
+        ip: 10.39.39.1
+      - name: vault
+        ip: 10.39.39.1
+      - name: prometheus
+        ip: 10.39.39.1
+      - name: argocd
+        ip: 10.39.39.1
+      - name: mort
+        ip: 10.39.39.1
+      - name: strapi
+        ip: 10.39.39.1
+      - name: mkaciuba
+        ip: 10.39.39.1
+      - name: purge-api
+        ip: 10.39.39.1
+      - name: traefik
+        ip: 10.39.39.1
+    networks:
+      - '192.168.39'
+      - '10.39.0.0'
+      - '172.16'
+  - name: m39
+    create_reverse_zones: false  # Skip creation of reverse zones
+    primaries:
+      - 10.39.38.201
+      - 10.39.38.202
+    name_servers:
+      - ns1
+      - ns2
+    hosts:
+      - name: ns1
+        ip: 10.39.38.201
+      - name: ns2
+        ip: 10.39.38.202
+      - name: nas
+        ip: 10.39.38.109
+      - name: atomic-1.node
+        ip: 10.39.38.111
+      - name: atomic-2.node
+        ip: 10.39.38.112
+      - name: cubie-1.node
+        ip: 10.39.38.201
+      - name: cubie-2.node
+        ip: 10.39.38.202
+      - name: cubietruck.node
+        ip: 10.39.38.200
+      - name: pi-big-1.node
+        ip: 10.39.38.100
+      - name: pi-big-2.node
+        ip: 10.39.38.102
+      - name: pi-big-3.node
+        ip: 10.39.38.103
+      - name: pi-big-4.node
+        ip: 10.39.38.104
+      - name: pi-small-1.node
+        ip: 10.39.38.106
+      - name: pi-small-2.node
+        ip: 10.39.38.107
+    networks:
+      - '192.168.39'
+      - '10.39.0.0'
+      - '172.16'
+
+bind_listen_ipv4:
+  - any
+
+bind_allow_query:
+  - any
+
+bind_acls:
+  - name: acl1
+    match_list:
+      - 192.168.39.0/24
+      - 10.39.0.0/16

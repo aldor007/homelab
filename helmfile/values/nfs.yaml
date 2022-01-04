@@ -1,0 +1,6 @@
+
+image:
+  repository: quay.io/external_storage/nfs-client-provisioner-arm
+
+nodeSelector:
+  beta.kubernetes.io/arch: arm64

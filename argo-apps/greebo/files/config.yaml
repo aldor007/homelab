@@ -1,0 +1,8 @@
+storage:
+  url: "grpc://monitoring-loki.monitoring.svc.cluster.local:9091"
+  sink: "loki"
+listen: "0.0.0.0:8081"
+maxmindPath: "Test"
+clients:
+  - project: 'ID'
+    key: 'KEY'

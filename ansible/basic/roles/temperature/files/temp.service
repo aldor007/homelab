@@ -1,0 +1,10 @@
+[Unit]
+Description=Python Raps service
+
+[Service]
+# Command to execute when the service is started
+ExecStart=/usr/bin/python3 /usr/local/bin/rasp.py
+Type=simple
+
+[Install]
+WantedBy=multi-user.target

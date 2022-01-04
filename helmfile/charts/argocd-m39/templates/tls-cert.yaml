@@ -1,0 +1,17 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: argocd-tls-cert
+spec:
+  commonName: argocd
+  duration: 1440h
+  renewBefore: 62h
+  dnsNames:
+    - "*.k8s.m39"
+    - "*.m39"
+  secretName: argo-cert
+  isCA: false
+  issuerRef:
+    name: selfsigned
+    kind: ClusterIssuer
+    group: cert-manager.io

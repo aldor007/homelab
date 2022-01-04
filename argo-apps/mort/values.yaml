@@ -1,0 +1,93 @@
+
+replicaCount: 2
+image:
+  repository: aldor007/mort
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations:
+  vault.security.banzaicloud.io/vault-addr: https://vault.vault.svc.cluster.local:8200
+  vault.security.banzaicloud.io/vault-tls-secret: "vault-tls"
+  vault.security.banzaicloud.io/vault-path: "kubernetes"
+  vault.security.banzaicloud.io/vault-role: "mort"
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: mort.k8s.m39
+      paths:
+        - "/"
+    - host: mort.mkaciuba.com
+      paths:
+        - "/"
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - mort.ingress
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+secrets:
+  enabled: true
+  env:
+    MORT_ASSETS_ACCESS_KEY: "vault:mort/data/buckets#assets.accessKey"
+    MORT_ASSETS_SECRET_ACCESS_KEY: "vault:mort/data/buckets#assets.secretAccessKey"
+    MORT_IMAGES_ACCESS_KEY: "vault:mort/data/buckets#images.accessKey"
+    MORT_IMAGES_SECRET_ACCESS_KEY: "vault:mort/data/buckets#images.secretAccessKey"
+    MORT_LIIP_ACCESS_KEY: "vault:mort/data/buckets#liip.accessKey"
+    MORT_LIIP_SECRET_ACCESS_KEY: "vault:mort/data/buckets#liip.secretAccessKey"
+    MORT_MEDIA_ACCESS_KEY: "vault:mort/data/buckets#media.accessKey"
+    MORT_MEDIA_SECRET_ACCESS_KEY: "vault:mort/data/buckets#media.secretAccessKey"
+    MORT_PHOTOS_ACCESS_KEY: "vault:mort/data/buckets#photos.accessKey"
+    MORT_PHOTOS_SECRET_ACCESS_KEY: "vault:mort/data/buckets#photos.secretAccessKey"
+    MORT_STORAGE_ACCESS_KEY: "vault:mort/data/mort-storage#accessKey"
+    MORT_STORAGE_SECRET_ACCESS_KEY: "vault:mort/data/mort-storage#secretAccessKey"
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

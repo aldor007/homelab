@@ -1,0 +1,14 @@
+nfs:
+  server: 10.39.38.201
+  path: /mnt/hdd
+
+# For creating the StorageClass automatically:
+storageClass:
+  create: true
+  provisionerName: cubie2
+  defaultClass: false
+  name: nfs-cubie2
+  allowVolumeExpansion: true
+  reclaimPolicy: Delete
+  archiveOnDelete: true
+  accessModes: ReadWriteMany

@@ -1,0 +1,26 @@
+---
+- hosts: dns
+  gather_facts: yes
+  become: yes
+  ignore_errors: yes
+  roles:
+    - role: bertvv.bind
+- hosts: cluster
+  # gather_facts: yes
+  become: yes
+  vars:
+    swap_file_size_mb: '1024'
+  roles:
+    - role: common
+    - role: geerlingguy.swap
+- hosts: storage
+  gather_facts: yes
+  become: yes
+  roles:
+    - role: storage
+    - role: geerlingguy.nfs
+- hosts: temperature
+  gather_facts: yes
+  become: yes
+  roles:
+    - role: temperature

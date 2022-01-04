@@ -1,0 +1,67 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    app.kubernetes.io/instance: {{  .Release.Name  }}
+    app.kubernetes.io/managed-by: {{  .Release.Service }}
+  name: {{ .Release.Name  }}-nodes.rules
+spec:
+  groups:
+    - name: hosts.rules
+      rules:
+        - alert: OutOfMemory
+          expr: (node_memory_MemFree_bytes + node_memory_Cached_bytes + node_memory_Buffers_bytes) / node_memory_MemTotal_bytes * 100 < 10
+          for: 5m
+          labels:
+            severity: error
+          annotations:
+            summary: "Out of memory (instance {{ `{{ $labels.instance }}` }})"
+            message: "Node memory is filling up (< 10% left)  VALUE = {{ `{{ $value }}` }}  LABELS: {{ `{{ $labels }}` }}"
+        - alert: UnusualNetworkThroughputIn
+          expr: sum by (instance) (irate(node_network_receive_bytes_total[2m])) / 1024 / 1024 > 100
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Unusual network throughput in (instance {{ `{{ $labels.instance }}` }})"
+            message: "Host network interfaces are probably receiving too much data (> 100 MB/s)  VALUE = {{ `{{ $value }}` }}  LABELS: {{ `{{ $labels }}` }}"
+        - alert: UnusualNetworkThroughputOut
+          expr: sum by (instance) (irate(node_network_transmit_bytes_total[2m])) / 1024 / 1024 > 100
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Unusual network throughput out (instance {{ `{{ $labels.instance }}` }})"
+            message: "Host network interfaces are probably sending too much data (> 100 MB/s)  VALUE = {{ `{{ $value }}` }}  LABELS: {{ `{{ $labels }}` }}"
+        - alert: UnusualDiskReadRate
+          expr: sum by (instance) (irate(node_disk_read_bytes_total[2m])) / 1024 / 1024 > 50
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Unusual disk read rate (instance {{ `{{ $labels.instance }}` }})"
+            message: "Disk is probably reading too much data (> 50 MB/s)  VALUE = {{ `{{ $value }}` }}  LABELS: {{ `{{ $labels }}` }}"
+        - alert: UnusualDiskWriteRate
+          expr: sum by (instance) (irate(node_disk_written_bytes_total[2m])) / 1024 / 1024 > 50
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Unusual disk write rate (instance {{ `{{ $labels.instance }}` }})"
+            message: "Disk is probably writing too much data (> 50 MB/s)  VALUE = {{ `{{ $value }}` }}  LABELS: {{ `{{ $labels }}` }}"
+        - alert: OutOfDiskSpace
+          expr: node_filesystem_free_bytes{mountpoint ="/rootfs"} / node_filesystem_size_bytes{mountpoint ="/rootfs"} * 100 < 10
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Out of disk space (instance {{ `{{ $labels.instance }}` }})"
+            message: "Disk is almost full (< 10% left)  VALUE = {{ `{{ $value }}` }}  LABELS: {{ `{{ $labels }}` }}"
+        - alert: HighCpuLoad
+          expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+          for: 5m
+          labels:
+            severity: error
+          annotations:
+            summary: "High CPU load (instance {{ `{{ $labels.instance }}` }})"
+            message: "CPU load is > 80%  VALUE = {{ `{{ $value }}` }}  LABELS: {{ `{{ $labels }}` }}"

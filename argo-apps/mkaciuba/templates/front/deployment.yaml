@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mkaciuba.fullname" . }}-front
+  labels:
+    {{- include "mkaciuba.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "mkaciuba.selectorLabels" . | nindent 6 }}
+      tier: mkaciuba-front
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        tier: mkaciuba-front
+        {{- include "mkaciuba.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "mkaciuba.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.front.image.repository }}:{{ .Values.front.image.tag  }}"
+          imagePullPolicy: {{ .Values.strapi.image.pullPolicy }}
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: API_URL
+              value: "http://mkaciuba-strapi/graphql"
+            - name: ASSETS_URL
+              value: "https://mort.mkaciuba.com/assets/mkaciuba"
+         {{- if .Values.front.secrets.enabled }}
+            {{- range $key, $value := .Values.front.secrets.env }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "mkaciuba.fullname"  $ }}-env-secrets-front"
+                  key: {{ $key }}
+            {{- end }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 3333
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /_health
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /_health
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

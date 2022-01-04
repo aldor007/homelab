@@ -1,0 +1,14 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRouteTCP
+metadata:
+  name: vault 
+spec:
+  routes:                      
+  - match: HostSNI(`vault.k8s.m39`)  
+    services:     
+    - name: vault 
+      port: 8200           
+      weight: 10           
+      terminationDelay: 400
+  tls:                
+    passthrough: true

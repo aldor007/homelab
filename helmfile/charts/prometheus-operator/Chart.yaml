@@ -1,0 +1,12 @@
+apiVersion: v2
+appVersion: 3.1.0
+description: A Helm chart for Promethues Operator
+name: monitoring
+version: 0.2.0
+dependencies:
+  - name: kube-prometheus-stack
+    version: 23.3.2
+    repository: https://prometheus-community.github.io/helm-charts
+  - name: loki-stack
+    version: 2.5.0
+    repository: https://grafana.github.io/helm-charts

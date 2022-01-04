@@ -1,0 +1,35 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ .Release.Name  }}-alerts-containers-common.rules
+  labels:
+    app.kubernetes.io/instance: {{  .Release.Name  }}
+    app.kubernetes.io/managed-by: {{  .Release.Service }}
+spec:
+  groups:
+    - name: containers.rules
+      rules:
+        - alert: ContainerCpuUsage70pct
+          expr: (sum by(node, name) (rate(container_cpu_usage_seconds_total{name=~".+",namespace!="jenkins-jobs"}[4m])) * 100) > 70
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Container CPU usage (instance {{ `{{ $labels.pod_name }}` }})"
+            message: "Container CPU usage is above 70%  VALUE = {{ `{{ $value }}` }}  LABELS: {{ `{{ $labels }}` }}"
+        - alert: ContainerCpuUsageHigh
+          expr: (sum by(node, name) (rate(container_cpu_usage_seconds_total{name=~".+",namespace!="jenkins-jobs"}[3m])) * 100)  > 83
+          for: 5m
+          labels:
+            severity: error
+          annotations:
+            summary: "Container CPU usage (instance {{ `{{ $labels.pod_name }}` }})"
+            message: "Container CPU usage is above 83%  VALUE = {{ `{{ $value }}` }}  LABELS: {{ `{{ $labels }}` }}"
+        - alert: ContainerVolumeIoUsage
+          expr: (sum(container_fs_io_current) BY (node, name) * 100) > 80
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Container Volume IO usage (instance {{ `{{ $labels.pod_name }}` }})"
+            message: "Container Volume IO usage is above 80%  VALUE = {{ `{{ $value }}` }}  LABELS: {{ `{{ $labels }}` }}"

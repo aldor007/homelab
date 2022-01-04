@@ -1,0 +1,4 @@
+- name: Configure bgp 
+  hosts: all
+  roles:
+    - bgp 

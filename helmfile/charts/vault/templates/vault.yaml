@@ -1,0 +1,123 @@
+apiVersion: vault.banzaicloud.com/v1alpha1
+kind: Vault
+metadata:
+  name: vault
+spec:
+  size: 1
+  image: vault:1.6.1
+  bankVaultsImage: ghcr.io/banzaicloud/bank-vaults:1.9.0
+  annotations:
+    traefik.ingress.kubernetes.io/service.serversscheme: https
+
+  serviceAccount: vault
+  ingress:
+    annotations:
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      # traefik.ingress.kubernetes.io/service.serversscheme: https
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+
+    # Override the default Ingress specification here
+    # This follows the same format as the standard Kubernetes Ingress
+    # See: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#ingressspec-v1beta1-extensions
+    spec:
+      rules:
+        - host: vault.k8s.m39
+          http:
+            paths:
+              - path: "/"
+                backend:
+                  serviceName: vault
+                  servicePort: 8200
+      tls:
+        - hosts:
+            - vault.k8s.m39
+          # secretName:
+  # Use local disk to store Vault file data, see config section.
+  volumes:
+    - name: vault-file
+      persistentVolumeClaim:
+        claimName: vault-file
+
+  volumeMounts:
+    - name: vault-file
+      mountPath: /vault/file
+
+  # Support for distributing the generated CA certificate Secret to other namespaces.
+  # Define a list of namespaces or use ["*"] for all namespaces.
+  caNamespaces:
+    - "*"
+
+  # Describe where you would like to store the Vault unseal keys and root token.
+  unsealConfig:
+    options:
+      # The preFlightChecks flag enables unseal and root token storage tests
+      # This is true by default
+      preFlightChecks: true
+    kubernetes:
+      secretNamespace: vault
+
+  # A YAML representation of a final vault config file.
+  # See https://www.vaultproject.io/docs/colfiguration/ for more information.
+  config:
+    storage:
+      file:
+        path: /vault/file
+    listener:
+      tcp:
+        address: 0.0.0.0:8200
+        tls_cert_file: /vault/tls/server.crt
+        tls_key_file: /vault/tls/server.key
+    ui: true
+
+  # See: https://banzaicloud.com/docs/bank-vaults/cli-tool/#example-external-vault-configuration
+  # The repository also contains a lot examples in the deploy/ and operator/deploy directories.
+  externalConfig:
+    policies:
+      - name: mort
+        rules: |
+          path "mort/*" {
+            capabilities = ["read","list"]
+          }
+      - name: mkaciuba
+        rules: |
+          path "mkaciuba/*" {
+            capabilities = ["read","list"]
+          }
+      - name: insti
+        rules: |
+          path "insti/*" {
+            capabilities = ["read","list"]
+          }
+    auth:
+      - type: kubernetes
+        roles:
+          # Allow every pod in the default namespace to use the secret kv store
+          - name: mort
+            bound_service_account_names: ["mort", "vault"]
+            bound_service_account_namespaces: ["*"]
+            policies: ["mort", "default"]
+            ttl: 1h
+          - name: mkaciuba
+            bound_service_account_names: ["mkaciuba", "vault", "purge-api"]
+            bound_service_account_namespaces: ["*"]
+            policies: ["mkaciuba", "default"]
+            ttl: 1h
+          - name: insti
+            bound_service_account_names: ["insti", "vault"]
+            bound_service_account_namespaces: ["*"]
+            policies: ["insti", "default"]
+            ttl: 1h
+
+    secrets:
+      - path: mort
+        type: kv
+        description: General secrets.
+        options:
+          version: 2
+
+  # credentialsConfig:
+  #   path: /db-password/pw
+  #   secretName: db-password
+
+  # Marks presence of Istio, which influences things like port namings
+  istioEnabled: false

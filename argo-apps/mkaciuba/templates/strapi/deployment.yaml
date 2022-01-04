@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mkaciuba.fullname" . }}-strapi
+  labels:
+    {{- include "mkaciuba.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "mkaciuba.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "mkaciuba.selectorLabels" . | nindent 8 }}
+        tier: mkaciuba-backend
+    spec:
+      volumes:
+        - name: tmp
+          persistentVolumeClaim:
+            claimName: {{ include "mkaciuba.fullname" . }}-tmp-pvc
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "mkaciuba.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.strapi.image.repository }}:{{ .Values.strapi.image.tag  }}"
+          imagePullPolicy: {{ .Values.strapi.image.pullPolicy }}
+          volumeMounts:
+            - name: tmp
+              mountPath: "/tmp/"
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: REDIS_HOST
+              value: redis-1-master.redis.svc.cluster.local
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_DB
+              value: "1"
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mariadb-mkaciuba
+                  key: strapiPassword
+         {{- if .Values.secrets.enabled }}
+            {{- range $key, $value := .Values.secrets.env }}
+            - name: {{ $key }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ include "mkaciuba.fullname"  $ }}-env-secrets"
+                  key: {{ $key }}
+            {{- end }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 1337
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 5
+            timeoutSeconds: 30
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            timeoutSeconds: 30
+            failureThreshold: 5
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

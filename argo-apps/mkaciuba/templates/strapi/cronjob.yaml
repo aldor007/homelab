@@ -1,0 +1,38 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: tmp-strapi-clean
+  namespace: {{ .Release.Namespace }}
+spec:
+  concurrencyPolicy: Allow
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          volumes:
+          - name: tmp
+            persistentVolumeClaim:
+                claimName: {{ include "mkaciuba.fullname" . }}-tmp-pvc
+          containers:
+          - args:
+            - rm
+            - -rf
+            - /tmp/*
+            command:
+            - /bin/sh
+            - -c
+            image: "{{ .Values.strapi.image.repository }}:{{ .Values.strapi.image.tag  }}"
+            imagePullPolicy: IfNotPresent
+            name: clear
+            volumeMounts:
+            - name: tmp
+              mountPath: "/tmp/"
+          dnsPolicy: ClusterFirst
+          restartPolicy: OnFailure
+          schedulerName: default-scheduler
+          securityContext: {}
+          terminationGracePeriodSeconds: 30
+  schedule: 22 4 * * *
+  successfulJobsHistoryLimit: 0
+  suspend: false

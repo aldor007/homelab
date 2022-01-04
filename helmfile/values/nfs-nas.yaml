@@ -1,0 +1,15 @@
+nfs:
+  server: 10.39.38.109
+  path: /volume2/data
+
+
+# For creating the StorageClass automatically:
+storageClass:
+  create: true
+  provisionerName: nas
+  defaultClass: false
+  name: nas
+  allowVolumeExpansion: true
+  reclaimPolicy: Delete
+  archiveOnDelete: true
+  accessModes: ReadWriteMany

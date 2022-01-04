@@ -1,0 +1,93 @@
+# Default values for purge-api.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/aldor007/purge-api
+  pullPolicy: Always
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations:
+  vault.security.banzaicloud.io/vault-addr: https://vault.vault.svc.cluster.local:8200
+  vault.security.banzaicloud.io/vault-tls-secret: "vault-tls"
+  vault.security.banzaicloud.io/vault-path: "kubernetes"
+  vault.security.banzaicloud.io/vault-role: "mkaciuba"
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: ture
+  annotations: {}
+  hosts:
+    - host: purge-api.k8s.m39
+      paths:
+        - /
+        - /v2
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+
+secrets:
+  enabled: true
+  env:
+    API_KEY: "vault:mkaciuba/data/purge-api#apiKey"
+    NGINX_URL: http://10.8.0.50
+    CF_API_KEY: "vault:mkaciuba/data/purge-api#cf.apiKey"
+    CF_API_EMAIL: "vault:mkaciuba/data/purge-api#cf.email"
+    CF_ZONE_ID: "vault:mkaciuba/data/purge-api#cf.zoneID"
+    STRAPI_REDIS: redis-1-master.redis.svc.cluster.local:6379
+    STRAPI_REDIS_DB: 1
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

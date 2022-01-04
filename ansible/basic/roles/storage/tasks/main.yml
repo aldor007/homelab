@@ -1,0 +1,4 @@
+- name: Install open-iscsi 
+  package:
+    name: open-iscsi 
+    state: present

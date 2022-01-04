@@ -1,0 +1,7 @@
+---
+k3s_version: v1.20.0+k3s2
+ansible_user: ansible
+systemd_dir: /etc/systemd/system
+master_ip: "{{ hostvars[groups['master'][0]]['ansible_host'] | default(groups['master'][0]) }}"
+extra_server_args: "--kube-apiserver-arg=feature-gates=RemoveSelfLink=false --disable traefik --disable servicelb"
+extra_agent_args: ""
