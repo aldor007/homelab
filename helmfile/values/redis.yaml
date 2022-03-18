@@ -325,11 +325,11 @@ master:
   ## Redis(TM) additional command line flags
   ##
   ## Can be used to specify command line flags, for example:
-  ## extraFlags:
-  ##  - "--maxmemory-policy volatile-ttl"
-  ##  - "--repl-backlog-size 1024mb"
+  extraFlags:
+    - "--maxmemory-policy all"
+    - maxmemory 
+    - "--repl-backlog-size 1024mb"
   ##
-  extraFlags: []
   ## Comma-separated list of Redis(TM) commands to disable
   ##
   ## Can be used to disable Redis(TM) commands for security reasons.

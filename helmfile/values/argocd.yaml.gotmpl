@@ -455,9 +455,11 @@ argo-cd:
       annotations: {}
 
     ingress:
-      enabled: false
+      enabled: true
       annotations:
         cert-manager.io/cluster-issuer: selfsigned
+        kubernetes.io/ingress.class: "kong"
+
       labels: {}
 
       ## Argo Ingress.

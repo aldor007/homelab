@@ -1,0 +1,66 @@
+replicaCount: 3
+
+image:
+  repository: ghcr.io/aldor007/cloudflared
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "2022.2.1"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+resources: {}
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+maxUnavailable: 1
+
+# Tunnel credentials
+# Run cloudflared tunnel login to gen a JSON credential file
+# Or use the cloudflare_argo_tunnel resource in Terraform
+# Credential format:
+#
+# {
+#   "AccountTag": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+#   "TunnelName": "example-tunnel",
+#   "TunnelID": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+#   "TunnelSecret": "base64encodedxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=="
+# }
+#
+credentials:
+  existingSecret: ""
+
+# Tunnel config
+config:
+  tunnel: example-tunnel
+  credentials-file: /etc/cloudflared/credentials.json
+  metrics: 0.0.0.0:2000
+  no-autoupdate: true
+  ingress:
+  - hostname: hello.example.com
+    service: http://hello.mynamespace:8000
+  - service: http_status:404
+
+podMonitor:
+  enabled: false
+
+  metricsEndpoints: {}
+  # - port: http
+  #   interval: 15s
+
+  # additional labels for the ServiceMonitor
+  extraLabels: {}
+  #  release: kube-prometheus-stack

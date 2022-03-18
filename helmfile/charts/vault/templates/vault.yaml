@@ -7,19 +7,19 @@ spec:
   image: vault:1.6.1
   bankVaultsImage: ghcr.io/banzaicloud/bank-vaults:1.9.0
   annotations:
-    traefik.ingress.kubernetes.io/service.serversscheme: https
+    konghq.com/protocol: https
 
   serviceAccount: vault
   ingress:
     annotations:
-      traefik.ingress.kubernetes.io/router.tls: "true"
-      # traefik.ingress.kubernetes.io/service.serversscheme: https
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      konghq.com/protocols: https
+
 
     # Override the default Ingress specification here
     # This follows the same format as the standard Kubernetes Ingress
     # See: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/#ingressspec-v1beta1-extensions
     spec:
+      ingressClassName: kong
       rules:
         - host: vault.k8s.m39
           http:

@@ -1,0 +1,55 @@
+kong:
+    env:
+        http2: "on"
+        nginx_worker_processes: "1"
+        client_body_buffer_size: "16k"
+        proxy_buffer_size: "64k"
+        nginx_upstream_keepalive_requests: "1000"
+        nginx_upstream_keepalive_timeout: "60s"
+        nginx_upstream_keepalive: "1000"
+        trusted_ips: "10.0.0.0/8, 2400:cb00::/32, 2606:4700::/32, 2803:f800::/32, 2405:b500::/32, 2405:8100::/32, 2a06:98c0::/29, 2c0f:f248::/32,173.245.48.0/20, 103.21.244.0/22, 103.22.200.0/22, 103.31.4.0/22, 141.101.64.0/18, 108.162.192.0/18, 190.93.240.0/20, 188.114.96.0/20,197.234.240.0/22,198.41.128.0/17, 162.158.0.0/15, 104.16.0.0/12,172.64.0.0/13, 131.0.72.0/22" # cloudflare IPs
+        real_ip_header: cf-connecting-ip
+        proxy_access_log: /dev/stdout custom_fmt
+        admin_access_log: /dev/stdout
+        nginx_http_log_format: |
+          custom_fmt '$remote_addr - [$time_local] - $http_host "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent"'
+          '[req_time=$request_time cache=$upstream_cache_status proxy_lat=$sent_http_x_kong_proxy_latency ups_lat=$sent_http_x_kong_upstream_latency] '
+          '[scheme=$scheme xff=$http_x_forwarded_for xfp=$http_x_forwarded_proto'
+          '[ups_bytes=$upstream_response_length ups_status=$upstream_status ups_addr=$upstream_addr] '
+    podAnnotations:
+      traffic.sidecar.istio.io/excludeOutboundIPRanges: 10.0.0.0/8
+    image:
+        tag: 2.7.0
+    resources:
+        limits:
+            cpu: 300m
+            memory: 312Mi
+        requests:
+            cpu: 50m
+            memory: 128Mi
+    podDisruptionBudget:
+      enabled: true
+      maxUnavailable: "25%"
+    serviceMonitor:
+        enabled: true
+        labels:
+          monitoring: prometheus
+    replicaCount: 2
+    updateStrategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxSurge: "50%"
+        maxUnavailable: "0%"
+    proxy:
+      type: LoadBalancer
+      loadBalancerIP: "10.39.39.39"
+    ingressController:
+      enabled: true
+      ingressClass: kong
+      image:
+        repository: ghcr.io/aldor007/kong-ingress-controller
+        tag: 2.2.1
+    plugins:
+        configMaps: []
+            # - pluginName: oauth2-introspect
+            #   name: kong-plugin-oauth2-introspect

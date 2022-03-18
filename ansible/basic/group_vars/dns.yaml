@@ -8,30 +8,8 @@ bind_zones:
       - ns1
       - ns2
     hosts:
-      - name: ns1
-        ip: 10.39.38.201
-      - name: ns2
-        ip: 10.39.38.202
-      - name: grafana
-        ip: 10.39.39.1
-      - name: alertmanager
-        ip: 10.39.39.1
-      - name: vault
-        ip: 10.39.39.1
-      - name: prometheus
-        ip: 10.39.39.1
-      - name: argocd
-        ip: 10.39.39.1
-      - name: mort
-        ip: 10.39.39.1
-      - name: strapi
-        ip: 10.39.39.1
-      - name: mkaciuba
-        ip: 10.39.39.1
-      - name: purge-api
-        ip: 10.39.39.1
-      - name: traefik
-        ip: 10.39.39.1
+      - name: "*" # kong
+        ip: 10.39.39.39
     networks:
       - '192.168.39'
       - '10.39.0.0'

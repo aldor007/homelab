@@ -17,18 +17,18 @@ repositories:
     url: https://charts.jetstack.io
   - name: argo
     url: https://argoproj.github.io/argo-helm
-  - name: presslabs
-    url: https://presslabs.github.io/charts
   - name: mariadb
     url: git+https://github.com/aldor007/mariadb-operator@charts
   - name: sealed-secrets
     url: https://bitnami-labs.github.io/sealed-secrets
+  - name: kong
+    url: https://charts.konghq.com
 
 
 
 environments:
   default:
-    values:
+    secrets:
       - env/secrets.yaml
 
 helmDefaults:
@@ -72,6 +72,12 @@ releases:
     version: 9.11.0
     values:
       - values/traefik.yaml
+  - name: kong
+    namespace: ingress
+    chart: charts/kong
+    version: 2.7.0
+    values:
+      - values/kong.yaml
   - name: nfs-cubie2
     namespace: nfs-provisioner
     chart: ./charts/nfs-subdir-external-provisioner
@@ -130,6 +136,19 @@ releases:
     namespace: mariadb
     chart: mariadb/mariadb-operator
     version: 0.1.0
+  - name: cloudflared-credentials
+    namespace: cloudflare
+    chart:  ./charts/cloudflare-creds
+    version: 0.1.0
+    values:
+      - config: |-
+          {{ .Values.cloudflareTunnelData }}
+  - name: cloudflared
+    namespace: cloudflare
+    chart:  ./charts/cloudflared
+    version: 0.3.3
+    values:
+      - values/cloudflared.yaml
 
   # longhorn is not working on A10/A20 - cubie
   # - name: longhorn
