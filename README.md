@@ -9,6 +9,7 @@ This is my configuration for local k3s cluster.
 # Blog posts
 
 https://mkaciuba.com/blog/posts/homelab-2022-part-1/ 
+
 https://mkaciuba.com/blog/posts/homelab-2022-part-2/
 
 ### Hardware
