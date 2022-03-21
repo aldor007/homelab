@@ -6,6 +6,11 @@ This is my configuration for local k3s cluster.
 
 <img src="https://mort.mkaciuba.com/images/transform/ZmlsZXMvc291cmNlcy9ubm5fZWM5MzZmY2Q3ZC5qcGc/photo_admin_big.jpg" width="500px"/>
 
+# Blog posts
+
+https://mkaciuba.com/blog/posts/homelab-2022-part-1/ 
+https://mkaciuba.com/blog/posts/homelab-2022-part-2/
+
 ### Hardware
 
 Compute:
