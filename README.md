@@ -31,6 +31,12 @@ Network:
 * Ubiquiti ER-10X EDGEMAX
 * Ubiquiti UniFi US-8-60W
 
+
+Network diagram:
+
+<img src="https://mort.mkaciuba.com/images/transform/ZmlsZXMvc291cmNlcy9uZXR3b3JrX2RpYWdyYW1fYTE3ZjBlZDAwZi5wbmc/photo_network-diagram_big.jpg" width="500px"/>
+
+
 Power supply:
 * ATX ModeCom B88 500W
 
