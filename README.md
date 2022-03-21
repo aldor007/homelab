@@ -12,6 +12,10 @@ https://mkaciuba.com/blog/posts/homelab-2022-part-1/
 
 https://mkaciuba.com/blog/posts/homelab-2022-part-2/
 
+# Image gallery
+
+https://imgur.com/a/QzCcYQ8
+
 ### Hardware
 
 Compute:
